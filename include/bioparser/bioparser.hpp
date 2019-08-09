@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "zlib.h"
+#include "kseq.h"
 
 namespace bioparser {
 
@@ -42,6 +43,9 @@ class FastaParser;
 
 template<class T>
 class FastqParser;
+
+template<class T>
+class HLFastqParser;
 
 template<class T>
 class MhapParser;
@@ -111,6 +115,24 @@ private:
     FastqParser(const FastqParser&) = delete;
     const FastqParser& operator=(const FastqParser&) = delete;
 };
+
+template<class T>
+class HLFastqParser: public Parser<T> {
+public:
+    ~HLFastqParser();
+
+    bool parse(std::vector<std::unique_ptr<T>>& dst,
+        std::uint64_t max_bytes, bool trim = true) override;
+
+    friend std::unique_ptr<Parser<T>>
+        createParser<bioparser::HLFastqParser, T>(const std::string& path);
+
+private:
+    HLFastqParser(gzFile input_file);
+    HLFastqParser(const HLFastqParser&) = delete;
+    const HLFastqParser& operator=(const HLFastqParser&) = delete;
+};
+
 
 template<class T>
 class MhapParser: public Parser<T> {
@@ -925,5 +947,33 @@ inline bool SamParser<T>::parse(std::vector<std::unique_ptr<T>>& dst,
     return status;
 }
 
+template<class T>
+inline HLFastqParser<T>::HLFastqParser(gzFile input_file)
+        : Parser<T>(input_file, kSSS + 2 * kMSS) {
+}
+
+template<class T>
+inline HLFastqParser<T>::~HLFastqParser() {
+}
+
+KSEQ_INIT(gzFile, gzread)
+template<class T>
+inline bool HLFastqParser<T>::parse(std::vector<std::unique_ptr<T>>& dst,
+    std::uint64_t max_bytes, bool trim) {
+
+    auto input_file = this->input_file_.get();
+    kseq_t *seq;
+    seq = kseq_init(input_file);
+
+    while (kseq_read(seq) >= 0){
+        auto create_T = [&] () -> void {
+            dst.emplace_back(std::unique_ptr<T>(new T(
+                (const char*) seq->name.s, seq->name.l,
+                (const char*) seq->seq.s, seq->seq.l,
+                (const char*) seq->qual.s, seq->qual.l)));
+        };
+    }
+    return false; // break the user's parser loop
+}
 
 }

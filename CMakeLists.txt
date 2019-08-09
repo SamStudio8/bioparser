@@ -14,6 +14,7 @@ option(bioparser_build_tests "Build bioparser unit tests" OFF)
 
 add_library(bioparser INTERFACE)
 
+target_include_directories(bioparser INTERFACE ${PROJECT_SOURCE_DIR}/include/kseq)
 target_include_directories(bioparser INTERFACE
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/vendor/zlib
