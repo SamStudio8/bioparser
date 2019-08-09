@@ -182,3 +182,5 @@ private:
     }
 };
 ```
+## Notes
+* `HLFastqParser` is a direct port of [Heng Li's `readfq` parser](https://github.com/lh3/readfq), available under the MIT license.
