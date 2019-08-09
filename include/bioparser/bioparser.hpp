@@ -972,6 +972,7 @@ inline bool HLFastqParser<T>::parse(std::vector<std::unique_ptr<T>>& dst,
                 (const char*) seq->seq.s, seq->seq.l,
                 (const char*) seq->qual.s, seq->qual.l)));
         };
+        create_T();
     }
     return false; // break the user's parser loop
 }
