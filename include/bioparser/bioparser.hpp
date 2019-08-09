@@ -966,13 +966,11 @@ inline bool HLFastqParser<T>::parse(std::vector<std::unique_ptr<T>>& dst,
     seq = kseq_init(input_file);
 
     while (kseq_read(seq) >= 0){
-        auto create_T = [&] () -> void {
-            dst.emplace_back(std::unique_ptr<T>(new T(
-                (const char*) seq->name.s, seq->name.l,
-                (const char*) seq->seq.s, seq->seq.l,
-                (const char*) seq->qual.s, seq->qual.l)));
-        };
-        create_T();
+        dst.emplace_back(std::unique_ptr<T>(new T(
+            (const char*) seq->name.s, seq->name.l,
+            (const char*) seq->seq.s, seq->seq.l,
+            (const char*) seq->qual.s, seq->qual.l))
+        );
     }
     return false; // break the user's parser loop
 }
